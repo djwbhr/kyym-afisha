@@ -1,0 +1,218 @@
+/* Page layout */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  min-height: 70dvh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.6);
+}
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.05),
+    rgba(0, 0, 0, 0.6)
+  );
+}
+.hero__content {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem;
+  text-align: center;
+  max-width: 960px;
+}
+.hero__title {
+  margin: 0 0 0.5rem 0;
+  font-size: clamp(2rem, 4vw + 1rem, 4rem);
+}
+.hero__subtitle {
+  margin: 0 0 1.25rem 0;
+  font-size: clamp(1rem, 1vw + 0.75rem, 1.5rem);
+  opacity: 0.9;
+}
+.hero__cta {
+  display: inline-flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Buttons */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  backdrop-filter: blur(6px);
+  text-align: center;
+  line-height: 1.2;
+}
+.button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.35);
+}
+.button--primary {
+  background: linear-gradient(135deg, #ff4d4d, #ff8a00);
+  color: #fff;
+  border: none;
+}
+.button--primary:hover {
+  filter: brightness(1.05);
+}
+
+/* Bigger buttons */
+.button--lg {
+  padding: 0.95rem 1.6rem;
+  font-size: 1.05rem;
+}
+@media (max-width: 360px) {
+  .button--lg {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.98rem;
+  }
+}
+
+/* Sections */
+.content {
+  width: min(1100px, 92%);
+  margin: 2rem auto;
+}
+@media (max-width: 600px) {
+  .content {
+    width: 94%;
+    margin: 1.25rem auto 4.5rem;
+  }
+}
+.section {
+  margin: 2rem 0;
+}
+.section__title {
+  margin: 0 0 0.75rem 0;
+  font-size: clamp(1.25rem, 1.2vw + 1rem, 2rem);
+}
+.section__body {
+  display: grid;
+  gap: 0.75rem;
+}
+.text {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Mobile typography tweaks */
+@media (max-width: 600px) {
+  .hero__title {
+    font-size: clamp(1.6rem, 5vw + 0.6rem, 2.6rem);
+  }
+  .hero__subtitle {
+    font-size: clamp(0.9rem, 1.2vw + 0.7rem, 1.15rem);
+  }
+  .section__title {
+    font-size: clamp(1.1rem, 1vw + 0.9rem, 1.5rem);
+  }
+  .text {
+    font-size: 0.95rem;
+  }
+  .button--lg {
+    padding: 0.85rem 1.3rem;
+    font-size: 1rem;
+  }
+}
+
+/* Video */
+.video {
+  position: relative;
+  aspect-ratio: 16 / 9; /* будет переопределено inline стилем при известном размере */
+  background: #111;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 auto;
+  touch-action: manipulation; /* лучшее поведение тапов */
+}
+@media (max-width: 600px) {
+  .video {
+    max-height: 60vh;
+  }
+}
+.video__el {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #000; /* черные полосы по краям где нужно */
+  object-position: center center;
+}
+
+/* Contacts */
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.contact {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  text-decoration: none;
+}
+.contact:hover {
+  border-style: solid;
+}
+
+/* Footer */
+.footer {
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem 3rem;
+}
+
+/* Floating CTA */
+.floating-cta {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateX(-50%) translateY(12px);
+  animation: floatingCtaIn 320ms ease-out forwards;
+  max-width: 94vw;
+  text-align: center;
+}
+.floating-cta:hover {
+  transform: translateX(-50%);
+}
+
+@keyframes floatingCtaIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
