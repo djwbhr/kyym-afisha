@@ -153,6 +153,16 @@
   margin: 0 auto;
   touch-action: manipulation; /* лучшее поведение тапов */
 }
+@media (min-width: 768px) {
+  .video {
+    max-width: 880px;
+  }
+}
+@media (min-width: 1200px) {
+  .video {
+    max-width: 960px;
+  }
+}
 @media (max-width: 600px) {
   .video {
     max-height: 60vh;

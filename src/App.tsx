@@ -43,7 +43,16 @@ function App() {
   const [videoAspect, setVideoAspect] = useState("16 / 9");
   const userPausedRef = useRef(false);
   const autoPauseRef = useRef(false);
-  const lastToggleTsRef = useRef(0);
+  const autoPlayedOnceRef = useRef(false);
+  const isIOS = useMemo<boolean>(() => {
+    const ua = navigator.userAgent || "";
+    const iOSDevice = /iPad|iPhone|iPod/.test(ua);
+    const iPadOS13Plus =
+      navigator.platform === "MacIntel" &&
+      ((navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints ||
+        0) > 1;
+    return iOSDevice || iPadOS13Plus;
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -53,14 +62,26 @@ function App() {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           if (userPausedRef.current) continue; // respect manual pause
-          try {
-            video.volume = 0.2;
-            video.muted = false;
-            await video.play();
-          } catch {
-            video.muted = true; // fallback: keep autoplay with mute
-            if (video.paused) {
+          if (isIOS) {
+            // На iOS: только первый автозапуск принудительно muted,
+            // дальше не трогаем состояние звука, чтобы не ломать кнопку
+            if (!autoPlayedOnceRef.current) {
+              video.muted = true;
               await video.play().catch(() => {});
+              autoPlayedOnceRef.current = true;
+            } else if (video.paused) {
+              await video.play().catch(() => {});
+            }
+          } else {
+            try {
+              video.volume = 0.2;
+              video.muted = false;
+              await video.play();
+            } catch {
+              video.muted = true; // fallback: keep autoplay with mute
+              if (video.paused) {
+                await video.play().catch(() => {});
+              }
             }
           }
         } else {
@@ -75,7 +96,7 @@ function App() {
     const observer = new IntersectionObserver(onIntersect, { threshold: 0.5 });
     observer.observe(video);
     return () => observer.disconnect();
-  }, []);
+  }, [isIOS]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -86,26 +107,6 @@ function App() {
         setVideoAspect(`${video.videoWidth} / ${video.videoHeight}`);
       }
       video.volume = 0.2;
-    };
-
-    const onUserGesture = () => {
-      video.muted = false;
-      video.volume = 0.2;
-    };
-
-    const onTogglePointerUp = async () => {
-      const now = performance.now();
-      if (now - lastToggleTsRef.current < 300) return; // dedupe double-fire
-      lastToggleTsRef.current = now;
-      if (video.paused) {
-        userPausedRef.current = false;
-        video.muted = false;
-        video.volume = 0.2;
-        await video.play().catch(() => {});
-      } else {
-        userPausedRef.current = true;
-        video.pause();
-      }
     };
 
     const onPlay = () => {
@@ -126,16 +127,15 @@ function App() {
 
     video.setAttribute("controlsList", "nodownload noplaybackrate");
     video.setAttribute("disablePictureInPicture", "");
+    // iOS Safari совместимость
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
     video.addEventListener("loadedmetadata", onLoadedMetadata);
-    video.addEventListener("touchstart", onUserGesture);
-    video.addEventListener("pointerup", onTogglePointerUp);
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
     video.addEventListener("contextmenu", onContextMenu);
     return () => {
       video.removeEventListener("loadedmetadata", onLoadedMetadata);
-      video.removeEventListener("touchstart", onUserGesture);
-      video.removeEventListener("pointerup", onTogglePointerUp);
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
       video.removeEventListener("contextmenu", onContextMenu);
@@ -198,6 +198,7 @@ function App() {
               className="video__el"
               controls
               preload="metadata"
+              autoPlay
               muted
               playsInline
               ref={videoRef}
